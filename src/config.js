@@ -1,6 +1,43 @@
 export const LANES = [-3.2, 0, 3.2];
 export const LANE_WIDTH = 3.2;
 
+export const CHARACTERS = [
+  {
+    id: 'ari',
+    name: 'ארי נחמן',
+    role: 'הרץ הקלאסי',
+    tagline: 'מלא שמחה, חיוך ומרץ בדרך לצדיק!',
+    renderMode: 'sprite',
+    portrait: 'assets/sprites/ari/front_wave.png',
+    victoryImg: 'assets/sprites/ari/front_jump.png',
+    isFullSpritePortrait: true,
+    accent: '#fbbf24',
+  },
+  {
+    id: 'lahav',
+    name: 'להב דויד',
+    role: 'שובר המניעות',
+    tagline: 'אמיץ ונחוש — עם חולצה #6 וציצית מתנופפת!',
+    renderMode: 'model3d',
+    portrait: 'assets/sprites/lahav/portrait.png',
+    victoryImg: 'assets/sprites/lahav/portrait.png',
+    isFullSpritePortrait: false,
+    accent: '#f97316',
+  },
+  {
+    id: 'yahav',
+    name: 'יהב',
+    female: true,
+    role: 'הכוכבת הזריזה',
+    tagline: 'מהירה ומדויקת — אוספת נקודות טובות בסטייל!',
+    renderMode: 'model3d',
+    portrait: 'assets/sprites/yahav/portrait.png',
+    victoryImg: 'assets/sprites/yahav/portrait.png',
+    isFullSpritePortrait: false,
+    accent: '#c084fc',
+  },
+];
+
 export const PLAYER_CONFIG = {
   baseHeight: 2.3,
   slideHeight: 1.0,
@@ -10,15 +47,15 @@ export const PLAYER_CONFIG = {
   fastFallGravity: 105,
   slideDuration: 0.65,
   laneLerpSpeed: 18,
-  baseSpeed: 18.5,
-  maxSpeed: 30.5,
-  maxHearts: 3,
+  baseSpeed: 18.8,
+  maxSpeed: 31.5,
+  maxStrikes: 3,
 };
 
 export const FLIGHT_CONFIG = {
-  baseDistance: 900,       // Punchy 900m run (300m per stage -> ~55-65s per flight!)
-  distancePerStage: 210,   // Slightly longer each subsequent flight
-  baseTimeSeconds: 85,     // Clear boarding countdown with fair headroom
+  baseDistance: 900,
+  distancePerStage: 220,
+  baseTimeSeconds: 82,
 };
 
 export const ZONES = [
@@ -56,7 +93,7 @@ export const ZONES = [
     ambientIntensity: 0.9,
     sunColor: 0xffd24c,
     sunIntensity: 1.4,
-    quote: 'שלב 2/3 — כל העולם כולו גשר צר מאד, והעיקר לא לפחד כלל! (×2 נקודות)',
+    quote: 'שלב 2/3 — כל העולם כולו גשר צר מאד, והעיקר לא לפחד כלל! (×2 ניקוד)',
   },
   {
     id: 'airport',
@@ -94,24 +131,24 @@ export const SHOP_UPGRADES = [
   {
     id: 'fireDuration',
     icon: '🔥',
-    title: 'כובע האש (מגן מניעות)',
-    desc: 'מאריך את משך המגן של "האש שלי תוקד"',
+    title: 'כובע האש (מגן מניעה)',
+    desc: 'מאריך את משך המגן של "האש שלי תוקד" (סופג פגיעה אחת)',
     maxLevel: 5,
     baseCost: 30,
     costStep: 25,
-    baseVal: 10,
-    valStep: 3,
+    baseVal: 8,
+    valStep: 2.5,
     unit: 'שנ׳',
   },
   {
     id: 'magnetDuration',
     icon: '🧲',
     title: 'מגנט אזמרה',
-    desc: 'מאריך את משך משיכת הנקודות הטובות מכל הנתיבים',
+    desc: 'מאריך את משיכת הנקודות הטובות מכל הנתיבים',
     maxLevel: 5,
     baseCost: 25,
     costStep: 22,
-    baseVal: 9,
+    baseVal: 8,
     valStep: 2.5,
     unit: 'שנ׳',
   },
@@ -123,32 +160,32 @@ export const SHOP_UPGRADES = [
     maxLevel: 5,
     baseCost: 25,
     costStep: 22,
-    baseVal: 9,
+    baseVal: 8,
     valStep: 2.5,
     unit: 'שנ׳',
   },
   {
     id: 'doubleDuration',
     icon: '⚡',
-    title: 'אור הצדיק (×2 נקודות)',
+    title: 'אור הצדיק (×2 ניקוד)',
     desc: 'מאריך את זמן הכפלת הנקודות והניקוד',
     maxLevel: 5,
     baseCost: 35,
     costStep: 30,
-    baseVal: 10,
-    valStep: 3,
+    baseVal: 9,
+    valStep: 2.5,
     unit: 'שנ׳',
   },
   {
-    id: 'freeRevives',
-    icon: '💛',
-    title: 'כוח "אין יאוש" (התחזקות)',
-    desc: 'מוסיף התחזקות חינם נוספת לשבירת מניעה בריצה',
-    maxLevel: 3,
-    baseCost: 50,
-    costStep: 55,
-    baseVal: 1,
-    valStep: 1,
-    unit: 'פעמים',
+    id: 'pointBonus',
+    icon: '✦',
+    title: 'ברכת אזמרה (תוספת ניקוד)',
+    desc: 'מגדיל את הניקוד הבסיסי של כל נקודה טובה שאוספים',
+    maxLevel: 5,
+    baseCost: 40,
+    costStep: 35,
+    baseVal: 25,
+    valStep: 5,
+    unit: 'נק׳',
   },
 ];

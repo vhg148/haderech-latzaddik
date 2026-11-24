@@ -1,8 +1,9 @@
-import { SHOP_UPGRADES } from './config.js';
+import { SHOP_UPGRADES, CHARACTERS } from './config.js';
 
-const STORAGE_KEY = 'haderech_latzaddik_save_v1';
+const STORAGE_KEY = 'haderech_latzaddik_save_v2';
 
 const DEFAULT_SAVE = {
+  selectedCharacter: 'ari',
   bankPoints: 0,
   bestScore: 0,
   flightsCompleted: 0,
@@ -11,18 +12,22 @@ const DEFAULT_SAVE = {
     magnetDuration: 0,
     wingsDuration: 0,
     doubleDuration: 0,
-    freeRevives: 0,
+    pointBonus: 0,
   },
 };
 
 export function loadSave() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('haderech_latzaddik_save_v1');
     if (!raw) return structuredClone(DEFAULT_SAVE);
     const parsed = JSON.parse(raw);
+    const validChar = CHARACTERS.some((c) => c.id === parsed.selectedCharacter)
+      ? parsed.selectedCharacter
+      : 'ari';
     return {
       ...DEFAULT_SAVE,
       ...parsed,
+      selectedCharacter: validChar,
       upgrades: {
         ...DEFAULT_SAVE.upgrades,
         ...(parsed.upgrades || {}),
