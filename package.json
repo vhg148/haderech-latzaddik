@@ -1,0 +1,18 @@
+{
+  "name": "rbino",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "export": "rm -rf dist haderech-latzaddik-web.zip && mkdir -p dist/lib && cp -R styles.css src assets dist/ && cp node_modules/three/build/three.module.js node_modules/three/build/three.core.js dist/lib/ && sed 's|./node_modules/three/build/three.module.js|./lib/three.module.js|g' index.html > dist/index.html && (cd dist && zip -qr ../haderech-latzaddik-web.zip .)",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "three": "^0.187.0"
+  }
+}

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>הדרך לצדיק • אזמרה ראן</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./lib/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="game-root">
+    <!-- Three.js WebGL Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Meni'ot Danger Vignette (pulses red/purple when on last heart) -->
+    <div id="danger-vignette" class="hidden">
+      <div class="danger-label">⚠️ נותר כוח אחד! המניעות צמודות — אל תתנגש!</div>
+    </div>
+
+    <!-- Joy Fever Golden Aura Vignette -->
+    <div id="joy-vignette" class="hidden"></div>
+
+    <!-- Floating Breslov Teaching / Stage Transition Banner -->
+    <div id="quote-banner" class="hidden">
+      <span class="quote-spark">✦</span>
+      <span id="quote-text"></span>
+      <span class="quote-spark">✦</span>
+    </div>
+
+    <!-- Final Sprint Callout (visible in final 150m to airplane!) -->
+    <div id="sprint-banner" class="hidden">
+      ✈️ <span id="sprint-meters">150</span> מ׳ למטוס — ספרינט אחרון לשער!
+    </div>
+
+    <!-- Floating Score / Action Popups -->
+    <div id="floating-popups"></div>
+
+    <!-- IN-GAME HUD -->
+    <div id="hud" class="hidden">
+      <!-- Top Bar -->
+      <div class="hud-top">
+        <!-- Score, Good Points & Clear 3 Hearts (Right side in RTL) -->
+        <div class="hud-card score-card">
+          <div class="stat-row">
+            <span class="stat-icon gold-orb-icon">✦</span>
+            <div class="stat-texts">
+              <span class="stat-label">נקודות טובות (רפ״ב)</span>
+              <span id="hud-good-points" class="stat-value gold-text">0</span>
+            </div>
+          </div>
+          <div class="hearts-row" title="כוחות עמידה מול מניעות">
+            <span class="hearts-label">כוח מול מניעות:</span>
+            <span id="hud-hearts" class="hearts-icons">💛💛💛</span>
+          </div>
+          <div class="sub-stats">
+            <span id="hud-score">ניקוד: 0</span>
+            <span id="hud-multiplier" class="multiplier-pill">×1</span>
+          </div>
+        </div>
+
+        <!-- Clear 3-Stage Flight Route & Boarding Countdown (Center) -->
+        <div class="hud-card flight-card">
+          <div class="flight-header">
+            <span id="hud-zone-name" class="zone-badge">שלב 1/3 • שדרות ירושלים</span>
+            <span id="hud-timer" class="timer-pill">⏱️ 01:25</span>
+          </div>
+          <div class="flight-bar-track">
+            <div id="hud-flight-fill" class="flight-bar-fill"></div>
+            <div class="stage-tick" style="right: 33.3%;"></div>
+            <div class="stage-tick" style="right: 66.6%;"></div>
+            <div id="hud-plane-marker" class="plane-marker">✈️</div>
+          </div>
+          <div class="stage-milestones">
+            <span id="ms-1" class="ms-item active">1. ירושלים</span>
+            <span id="ms-2" class="ms-item">2. גשר צר מאד</span>
+            <span id="ms-3" class="ms-item">3. נתב״ג</span>
+            <span id="ms-goal" class="ms-item goal">✈️ אומן!</span>
+          </div>
+          <div class="flight-footer">
+            <span id="hud-distance-left">נותרו 900 מ׳ עד המטוס</span>
+            <span id="hud-flight-stage">טיסה #1</span>
+          </div>
+        </div>
+
+        <!-- Controls & Sound (Left side in RTL) -->
+        <div class="hud-controls">
+          <button id="btn-sound" class="icon-btn" title="צלילים וניגון">🔊</button>
+          <button id="btn-pause" class="icon-btn" title="השהייה (P)">⏸</button>
+        </div>
+      </div>
+
+      <!-- Joy Fever Meter (clean, non-cluttered) -->
+      <div class="hud-side-meters">
+        <div class="meter-box joy-meter-box">
+          <div class="meter-title">
+            <span>✨ שמחה תמיד</span>
+            <span id="hud-joy-pct">0%</span>
+          </div>
+          <div class="meter-track">
+            <div id="hud-joy-fill" class="meter-fill joy-fill"></div>
+          </div>
+          <div id="joy-ready-hint" class="meter-hint hidden">לחץ E להפעלת שמחה!</div>
+        </div>
+      </div>
+
+      <!-- Active Power-Ups Bar (Bottom Center) -->
+      <div id="active-powerups" class="powerups-bar"></div>
+
+      <!-- Combo Badge -->
+      <div id="combo-badge" class="combo-badge hidden">
+        <span class="combo-num" id="combo-count">×5</span>
+        <span class="combo-label">רצף אזמרה!</span>
+      </div>
+
+      <!-- Subtle Bottom Control Hint (fades out after few seconds) -->
+      <div id="controls-hint" class="controls-hint">
+        <span>⬅️ ➡️ החלף נתיב</span>
+        <span>⬆️ קפוץ</span>
+        <span>⬇️ החלק</span>
+        <span>שבור מניעות והספק לטיסה!</span>
+      </div>
+    </div>
+
+    <!-- START / TITLE SCREEN -->
+    <div id="start-screen" class="overlay-screen">
+      <div class="start-panel">
+        <div class="title-emblem">
+          <span class="emblem-tag">בס״ד • בהשראת תורת רבי נחמן מברסלב</span>
+          <h1 class="game-title">הדרך לצדיק</h1>
+          <p class="game-subtitle">אוספים <strong>נקודות טובות</strong> (תורה רפ״ב) • שוברים את <strong>המניעות</strong> • מספיקים לטיסה לאומן!</p>
+        </div>
+
+        <div class="hero-showcase">
+          <div class="hero-glow"></div>
+          <img src="assets/sprites/front_wave.png" alt="הרץ של רבי נחמן" class="hero-sprite-preview" />
+          <div class="hero-stats-pills">
+            <div class="mini-pill">
+              <span class="mini-label">בנק נקודות טובות</span>
+              <span id="menu-bank-points" class="mini-val gold-text">0</span>
+            </div>
+            <div class="mini-pill">
+              <span class="mini-label">שיא ניקוד</span>
+              <span id="menu-best-score" class="mini-val">0</span>
+            </div>
+            <div class="mini-pill">
+              <span class="mini-label">טיסות שהושלמו</span>
+              <span id="menu-flights-won" class="mini-val sky-text">0 ✈️</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="motifs-grid">
+          <div class="motif-chip">
+            <span class="motif-icon">✦</span>
+            <div>
+              <strong>נקודות טובות</strong>
+              <small>ממלאות מד שמחה וניגון</small>
+            </div>
+          </div>
+          <div class="motif-chip">
+            <span class="motif-icon">🔥</span>
+            <div>
+              <strong>כובע האש</strong>
+              <small>מגן ושובר מניעות בדרך</small>
+            </div>
+          </div>
+          <div class="motif-chip">
+            <span class="motif-icon">🌉</span>
+            <div>
+              <strong>גשר צר מאד</strong>
+              <small>קטע אתגר עם ניקוד כפול</small>
+            </div>
+          </div>
+          <div class="motif-chip">
+            <span class="motif-icon">🧲</span>
+            <div>
+              <strong>מגנט אזמרה</strong>
+              <small>מושך נקודות מכל הנתיבים</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="start-actions">
+          <button id="btn-play" class="btn-primary btn-glow">
+            <span>צא לדרך לטיסה!</span>
+            <span class="btn-arrow">✈️</span>
+          </button>
+          <button id="btn-shop" class="btn-secondary">
+            <span>✨ חיזוקים ושדרוגים</span>
+          </button>
+        </div>
+
+        <div class="start-controls-footer">
+          🎯 המטרה: עבור 3 שלבים (ירושלים ← גשר צר מאד ← נתב״ג) והגע למטוס לפני שנגמר הזמן, עם 3 כוחות 💛 מול המניעות!<br />
+          מקשים: חצים / WASD לתנועה, קפיצה והחלקה • E למצב שמחה
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOP / UPGRADES MODAL -->
+    <div id="shop-screen" class="overlay-screen hidden">
+      <div class="modal-card shop-card">
+        <div class="modal-header">
+          <h2>✨ חיזוקים לדרך (בנק נקודות טובות)</h2>
+          <div class="shop-balance">
+            <span>✦</span>
+            <span id="shop-bank-val">0</span>
+          </div>
+        </div>
+        <p class="modal-desc">השתמש בנקודות הטובות שאספת כדי לחזק את הכוחות הרוחניים בדרך לצדיק:</p>
+        <div id="shop-items" class="shop-items-grid"></div>
+        <div class="modal-actions">
+          <button id="btn-shop-close" class="btn-primary">חזרה למשחק</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAUSE OVERLAY -->
+    <div id="pause-screen" class="overlay-screen hidden">
+      <div class="modal-card compact-card">
+        <h2>⏸ התבודדות קצרה (השהייה)</h2>
+        <p class="modal-quote">״מצווה גדולה להיות בשמחה תמיד״</p>
+        <div class="modal-actions vertical">
+          <button id="btn-resume" class="btn-primary">המשך בריצה</button>
+          <button id="btn-restart-pause" class="btn-secondary">התחל מחדש</button>
+          <button id="btn-home-pause" class="btn-ghost">תפריט ראשי</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME OVER / MENI'OT CAUGHT OVERLAY -->
+    <div id="gameover-screen" class="overlay-screen hidden">
+      <div class="modal-card gameover-card">
+        <div class="gameover-badge" id="gameover-reason-badge">🌩️ המניעה עצרה אותך</div>
+        <h2 class="gameover-title">אין שום יאוש בעולם כלל!</h2>
+        <p class="modal-quote" id="gameover-quote">״המניעה היא רק בשביל להגדיל את החשק להגיע לצדיק״</p>
+
+        <div class="run-summary-grid">
+          <div class="summary-box">
+            <span class="summary-label">ניקוד ריצה</span>
+            <span id="go-score" class="summary-val">0</span>
+          </div>
+          <div class="summary-box">
+            <span class="summary-label">נקודות טובות</span>
+            <span id="go-good-points" class="summary-val gold-text">0</span>
+          </div>
+          <div class="summary-box">
+            <span class="summary-label">מרחק שעברת</span>
+            <span id="go-distance" class="summary-val">0 מ׳</span>
+          </div>
+          <div class="summary-box">
+            <span class="summary-label">מניעות שנשברו</span>
+            <span id="go-broken" class="summary-val fire-text">0</span>
+          </div>
+        </div>
+
+        <div class="modal-actions vertical">
+          <button id="btn-revive" class="btn-gold">
+            <span>🔥 שבור מניעה והמשך! (התחזקות)</span>
+            <small id="revive-cost-label">חינם פעם בריצה!</small>
+          </button>
+          <button id="btn-retry" class="btn-primary">נסה שוב מהתחלה</button>
+          <button id="btn-go-home" class="btn-ghost">תפריט ראשי וחיזוקים</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLIGHT REACHED / VICTORY OVERLAY -->
+    <div id="victory-screen" class="overlay-screen hidden">
+      <div class="modal-card victory-card">
+        <div class="victory-sparkle">✈️ ✦ 🔥 ✦ ✈️</div>
+        <img src="assets/sprites/front_jump.png" alt="שמחה בהגעה לטיסה" class="victory-hero" />
+        <h2 class="victory-title">הגעת לטיסה לצדיק!</h2>
+        <p class="modal-quote">״העיקר להגיע — ניצחת את כל המניעות בדרך לאומן!״</p>
+
+        <div class="run-summary-grid">
+          <div class="summary-box">
+            <span class="summary-label">בונוס הגעה לטיסה</span>
+            <span id="vic-bonus" class="summary-val gold-text">+50 ✦</span>
+          </div>
+          <div class="summary-box">
+            <span class="summary-label">נקודות טובות בריצה</span>
+            <span id="vic-good-points" class="summary-val gold-text">0</span>
+          </div>
+          <div class="summary-box">
+            <span class="summary-label">ניקוד מצטבר</span>
+            <span id="vic-score" class="summary-val">0</span>
+          </div>
+          <div class="summary-box">
+            <span class="summary-label">טיסה שהושלמה</span>
+            <span id="vic-stage" class="summary-val sky-text">#1</span>
+          </div>
+        </div>
+
+        <div class="modal-actions vertical">
+          <button id="btn-next-flight" class="btn-primary btn-glow">
+            <span>המשך לטיסה הבאה (מהיר ומאתגר יותר!) ✈️</span>
+          </button>
+          <button id="btn-vic-home" class="btn-secondary">תפריט ראשי וחיזוקים</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
